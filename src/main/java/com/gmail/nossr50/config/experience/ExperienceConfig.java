@@ -3,11 +3,13 @@ package com.gmail.nossr50.config.experience;
 import com.gmail.nossr50.config.AutoUpdateConfigLoader;
 import com.gmail.nossr50.datatypes.experience.FormulaType;
 import com.gmail.nossr50.datatypes.skills.MaterialType;
-import com.gmail.nossr50.datatypes.skills.SkillType;
+import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import com.gmail.nossr50.datatypes.skills.alchemy.PotionStage;
 import com.gmail.nossr50.util.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
 import org.bukkit.entity.EntityType;
 
 import java.util.ArrayList;
@@ -85,18 +87,18 @@ public class ExperienceConfig extends AutoUpdateConfigLoader {
         /* Alchemy */
         for (PotionStage potionStage : PotionStage.values()) {
             if (getPotionXP(potionStage) < 0) {
-                reason.add("Experience.Alchemy.Potion_Stage_" + potionStage.toNumerical() + " should be at least 0!");
+                reason.add("Experience_Values.Alchemy.Potion_Stage_" + potionStage.toNumerical() + " should be at least 0!");
             }
         }
 
         /* Archery */
         if (getArcheryDistanceMultiplier() < 0) {
-            reason.add("Experience.Archery.Distance_Multiplier should be at least 0!");
+            reason.add("Experience_Values.Archery.Distance_Multiplier should be at least 0!");
         }
 
         /* Combat XP Multipliers */
         if (getAnimalsXP() < 0) {
-            reason.add("Experience.Combat.Multiplier.Animals should be at least 0!");
+            reason.add("Experience_Values.Combat.Multiplier.Animals should be at least 0!");
         }
 
         if (getDodgeXPModifier() < 0) {
@@ -115,29 +117,42 @@ public class ExperienceConfig extends AutoUpdateConfigLoader {
         // TODO: Add validation for each fish type once enum is available.
 
         if (getFishingShakeXP() <= 0) {
-            reason.add("Experience.Fishing.Shake should be greater than 0!");
+            reason.add("Experience_Values.Fishing.Shake should be greater than 0!");
         }
 
         /* Repair */
         if (getRepairXPBase() <= 0) {
-            reason.add("Experience.Repair.Base should be greater than 0!");
+            reason.add("Experience_Values.Repair.Base should be greater than 0!");
         }
 
         /* Taming */
         if (getTamingXP(EntityType.WOLF) <= 0) {
-            reason.add("Experience.Taming.Animal_Taming.Wolf should be greater than 0!");
+            reason.add("Experience_Values.Taming.Animal_Taming.Wolf should be greater than 0!");
         }
 
         if (getTamingXP(EntityType.OCELOT) <= 0) {
-            reason.add("Experience.Taming.Animal_Taming.Ocelot should be greater than 0!");
+            reason.add("Experience_Values.Taming.Animal_Taming.Ocelot should be greater than 0!");
         }
 
         return noErrorsInConfig(reason);
     }
 
+    public boolean isEarlyGameBoostEnabled() { return config.getBoolean("EarlyGameBoost.Enabled", true); }
+
     /*
      * FORMULA SETTINGS
      */
+
+    /* EXPLOIT TOGGLES */
+    public boolean isEndermanEndermiteFarmingPrevented() { return config.getBoolean("ExploitFix.EndermanEndermiteFarms", true); }
+    public boolean isPistonCheatingPrevented() { return config.getBoolean("ExploitFix.PistonCheating", true); }
+    public boolean isPistonExploitPrevented() { return config.getBoolean("ExploitFix.Pistons", false); }
+    public boolean allowUnsafeEnchantments() { return config.getBoolean("ExploitFix.UnsafeEnchantments", false); }
+    public boolean isCOTWBreedingPrevented() { return config.getBoolean("ExploitFix.COTWBreeding", true); }
+
+    public boolean isFishingExploitingPrevented() { return config.getBoolean("ExploitFix.Fishing", true); }
+    public boolean isAcrobaticsExploitingPrevented() { return config.getBoolean("ExploitFix.Acrobatics", true); }
+    public boolean isTreeFellerXPReduced() { return config.getBoolean("ExploitFix.TreeFellerReducedXP", true); }
 
     /* Curve settings */
     public FormulaType getFormulaType() { return FormulaType.getFormulaType(config.getString("Experience_Formula.Curve")); }
@@ -160,14 +175,15 @@ public class ExperienceConfig extends AutoUpdateConfigLoader {
     public double getBredMobXpMultiplier() { return config.getDouble("Experience_Formula.Breeding.Multiplier", 1.0); }
 
     /* Skill modifiers */
-    public double getFormulaSkillModifier(SkillType skill) { return config.getDouble("Experience_Formula.Modifier." + StringUtils.getCapitalized(skill.toString())); }
+    public double getFormulaSkillModifier(PrimarySkillType skill) { return config.getDouble("Experience_Formula.Modifier." + StringUtils.getCapitalized(skill.toString())); }
 
     /* Custom XP perk */
     public double getCustomXpPerkBoost() { return config.getDouble("Experience_Formula.Custom_XP_Perk.Boost", 1.25); }
 
     /* Diminished Returns */
+    public float getDiminishedReturnsCap() { return (float) config.getDouble("Dimished_Returns.Guaranteed_Minimum_Percentage", 0.05D); }
     public boolean getDiminishedReturnsEnabled() { return config.getBoolean("Diminished_Returns.Enabled", false); }
-    public int getDiminishedReturnsThreshold(SkillType skill) { return config.getInt("Diminished_Returns.Threshold." + StringUtils.getCapitalized(skill.toString()), 20000); }
+    public int getDiminishedReturnsThreshold(PrimarySkillType skill) { return config.getInt("Diminished_Returns.Threshold." + StringUtils.getCapitalized(skill.toString()), 20000); }
     public int getDiminishedReturnsTimeInterval() { return config.getInt("Diminished_Returns.Time_Interval", 10); }
 
     /* Conversion */
@@ -178,18 +194,18 @@ public class ExperienceConfig extends AutoUpdateConfigLoader {
      */
 
     /* General Settings */
-    public boolean getExperienceGainsPlayerVersusPlayerEnabled() { return config.getBoolean("Experience.PVP.Rewards", true); }
+    public boolean getExperienceGainsPlayerVersusPlayerEnabled() { return config.getBoolean("Experience_Values.PVP.Rewards", true); }
 
     /* Combat XP Multipliers */
-    public double getCombatXP(EntityType entity) { return config.getDouble("Experience.Combat.Multiplier." + StringUtils.getPrettyEntityTypeString(entity).replace(" ", "_")); }
-    public double getAnimalsXP(EntityType entity) { return config.getDouble("Experience.Combat.Multiplier." + StringUtils.getPrettyEntityTypeString(entity).replace(" ", "_"), getAnimalsXP()); }
-    public double getAnimalsXP() { return config.getDouble("Experience.Combat.Multiplier.Animals", 1.0); }
-    public boolean hasCombatXP(EntityType entity) {return config.contains("Experience.Combat.Multiplier." + StringUtils.getPrettyEntityTypeString(entity).replace(" ", "_")); }
+    public double getCombatXP(EntityType entity) { return config.getDouble("Experience_Values.Combat.Multiplier." + StringUtils.getPrettyEntityTypeString(entity).replace(" ", "_")); }
+    public double getAnimalsXP(EntityType entity) { return config.getDouble("Experience_Values.Combat.Multiplier." + StringUtils.getPrettyEntityTypeString(entity).replace(" ", "_"), getAnimalsXP()); }
+    public double getAnimalsXP() { return config.getDouble("Experience_Values.Combat.Multiplier.Animals", 1.0); }
+    public boolean hasCombatXP(EntityType entity) {return config.contains("Experience_Values.Combat.Multiplier." + StringUtils.getPrettyEntityTypeString(entity).replace(" ", "_")); }
 
     /* Materials  */
-    public int getXp(SkillType skill, Material data)
+    public int getXp(PrimarySkillType skill, Material data)
     {
-        String baseString = "Experience." + StringUtils.getCapitalized(skill.toString()) + ".";
+        String baseString = "Experience_Values." + StringUtils.getCapitalized(skill.toString()) + ".";
         String explicitString = baseString + StringUtils.getExplicitConfigMaterialString(data);
         if (config.contains(explicitString))
             return config.getInt(explicitString);
@@ -203,9 +219,9 @@ public class ExperienceConfig extends AutoUpdateConfigLoader {
     }
 
     /* Materials  */
-    public int getXp(SkillType skill, BlockData data)
+    public int getXp(PrimarySkillType skill, BlockData data)
     {
-        String baseString = "Experience." + StringUtils.getCapitalized(skill.toString()) + ".";
+        String baseString = "Experience_Values." + StringUtils.getCapitalized(skill.toString()) + ".";
         String explicitString = baseString + StringUtils.getExplicitConfigBlockDataString(data);
         if (config.contains(explicitString))
             return config.getInt(explicitString);
@@ -218,9 +234,9 @@ public class ExperienceConfig extends AutoUpdateConfigLoader {
         return 0;
     }
 
-    public boolean isSkillBlock(SkillType skill, Material data)
+    public boolean doesBlockGiveSkillXP(PrimarySkillType skill, Material data)
     {
-        String baseString = "Experience." + StringUtils.getCapitalized(skill.toString()) + ".";
+        String baseString = "Experience_Values." + StringUtils.getCapitalized(skill.toString()) + ".";
         String explicitString = baseString + StringUtils.getExplicitConfigMaterialString(data);
         if (config.contains(explicitString))
             return true;
@@ -231,9 +247,9 @@ public class ExperienceConfig extends AutoUpdateConfigLoader {
         return config.contains(wildcardString);
     }
 
-    public boolean isSkillBlock(SkillType skill, BlockData data)
+    public boolean doesBlockGiveSkillXP(PrimarySkillType skill, BlockData data)
     {
-        String baseString = "Experience." + StringUtils.getCapitalized(skill.toString()) + ".";
+        String baseString = "Experience_Values." + StringUtils.getCapitalized(skill.toString()) + ".";
         String explicitString = baseString + StringUtils.getExplicitConfigBlockDataString(data);
         if (config.contains(explicitString))
             return true;
@@ -242,30 +258,83 @@ public class ExperienceConfig extends AutoUpdateConfigLoader {
             return true;
         String wildcardString = baseString + StringUtils.getWildcardConfigBlockDataString(data);
         return config.contains(wildcardString);
+    }
+
+    /*
+     * Experience Bar Stuff
+     */
+
+    public boolean isPartyExperienceBarsEnabled()
+    {
+        return config.getBoolean("Experience_Bars.Update.Party", true);
+    }
+
+    public boolean isPassiveGainsExperienceBarsEnabled()
+    {
+        return config.getBoolean("Experience_Bars.Update.Passive", true);
+    }
+
+    public boolean getDoExperienceBarsAlwaysUpdateTitle()
+    {
+        return config.getBoolean("Experience_Bars.ThisMayCauseLag.AlwaysUpdateTitlesWhenXPIsGained.Enable", false) || getAddExtraDetails();
+    }
+
+    public boolean getAddExtraDetails() { return config.getBoolean("Experience_Bars.ThisMayCauseLag.AlwaysUpdateTitlesWhenXPIsGained.ExtraDetails", false);}
+    public boolean isExperienceBarsEnabled() { return config.getBoolean("Experience_Bars.Enable", true); }
+    public boolean isExperienceBarEnabled(PrimarySkillType primarySkillType) { return config.getBoolean("Experience_Bars."+StringUtils.getCapitalized(primarySkillType.toString())+".Enable", true);}
+
+    public BarColor getExperienceBarColor(PrimarySkillType primarySkillType)
+    {
+        String colorValueFromConfig = config.getString("Experience_Bars."+StringUtils.getCapitalized(primarySkillType.toString())+".Color");
+
+        for(BarColor barColor : BarColor.values())
+        {
+            if(barColor.toString().equalsIgnoreCase(colorValueFromConfig))
+                return barColor;
+        }
+
+        //In case the value is invalid
+        return BarColor.WHITE;
+    }
+
+    public BarStyle getExperienceBarStyle(PrimarySkillType primarySkillType)
+    {
+        String colorValueFromConfig = config.getString("Experience_Bars."+StringUtils.getCapitalized(primarySkillType.toString())+".BarStyle");
+
+        for(BarStyle barStyle : BarStyle.values())
+        {
+            if(barStyle.toString().equalsIgnoreCase(colorValueFromConfig))
+                return barStyle;
+        }
+
+        //In case the value is invalid
+        return BarStyle.SOLID;
     }
 
     /* Acrobatics */
-    public int getDodgeXPModifier() { return config.getInt("Experience.Acrobatics.Dodge", 120); }
-    public int getRollXPModifier() { return config.getInt("Experience.Acrobatics.Roll", 80); }
-    public int getFallXPModifier() { return config.getInt("Experience.Acrobatics.Fall", 120); }
+    public int getDodgeXPModifier() { return config.getInt("Experience_Values.Acrobatics.Dodge", 120); }
+    public int getRollXPModifier() { return config.getInt("Experience_Values.Acrobatics.Roll", 80); }
+    public int getFallXPModifier() { return config.getInt("Experience_Values.Acrobatics.Fall", 120); }
 
-    public double getFeatherFallXPModifier() { return config.getDouble("Experience.Acrobatics.FeatherFall_Multiplier", 2.0); }
+    public double getFeatherFallXPModifier() { return config.getDouble("Experience_Values.Acrobatics.FeatherFall_Multiplier", 2.0); }
 
     /* Alchemy */
-    public double getPotionXP(PotionStage stage) { return config.getDouble("Experience.Alchemy.Potion_Stage_" + stage.toNumerical(), 10D); }
+    public double getPotionXP(PotionStage stage) { return config.getDouble("Experience_Values.Alchemy.Potion_Stage_" + stage.toNumerical(), 10D); }
 
     /* Archery */
-    public double getArcheryDistanceMultiplier() { return config.getDouble("Experience.Archery.Distance_Multiplier", 0.025); }
+    public double getArcheryDistanceMultiplier() { return config.getDouble("Experience_Values.Archery.Distance_Multiplier", 0.025); }
 
-    public int getFishingShakeXP() { return config.getInt("Experience.Fishing.Shake", 50); }
+    public int getFishingShakeXP() { return config.getInt("Experience_Values.Fishing.Shake", 50); }
 
     /* Repair */
-    public double getRepairXPBase() { return config.getDouble("Experience.Repair.Base", 1000.0); }
-    public double getRepairXP(MaterialType repairMaterialType) { return config.getDouble("Experience.Repair." + StringUtils.getCapitalized(repairMaterialType.toString())); }
+    public double getRepairXPBase() { return config.getDouble("Experience_Values.Repair.Base", 1000.0); }
+    public double getRepairXP(MaterialType repairMaterialType) { return config.getDouble("Experience_Values.Repair." + StringUtils.getCapitalized(repairMaterialType.toString())); }
 
     /* Taming */
     public int getTamingXP(EntityType type)
     {
-        return config.getInt("Experience.Taming.Animal_Taming." + StringUtils.getPrettyEntityTypeString(type));
+        return config.getInt("Experience_Values.Taming.Animal_Taming." + StringUtils.getPrettyEntityTypeString(type));
     }
+
+    public boolean preventStoneLavaFarming() { return config.getBoolean("ExploitFix.LavaStoneAndCobbleFarming", true);}
 }

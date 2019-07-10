@@ -6,6 +6,7 @@ import com.gmail.nossr50.locale.LocaleLoader;
 import com.gmail.nossr50.mcMMO;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
@@ -30,6 +31,10 @@ public final class ItemUtils {
             default:
                 return mcMMO.getModManager().isCustomBow(type);
         }
+    }
+
+    public static boolean hasItemInEitherHand(Player player, Material material) {
+        return player.getInventory().getItemInMainHand().getType() == material || player.getInventory().getItemInOffHand().getType() == material;
     }
 
     /**
@@ -366,7 +371,7 @@ public final class ItemUtils {
      * @return true if the item is a tool, false otherwise
      */
     public static boolean isMinecraftTool(ItemStack item) {
-        return isStoneTool(item) || isWoodTool(item) || isGoldTool(item) || isIronTool(item) || isDiamondTool(item) || isStringTool(item);
+        return isStoneTool(item) || isWoodTool(item) || isGoldTool(item) || isIronTool(item) || isDiamondTool(item) || isStringTool(item) || item.getType() == Material.TRIDENT;
     }
 
     /**
@@ -503,6 +508,7 @@ public final class ItemUtils {
             case FISHING_ROD:
             case CARROT_ON_A_STICK:
             case FLINT_AND_STEEL:
+            case TRIDENT:
                 return true;
 
             default:
@@ -520,7 +526,9 @@ public final class ItemUtils {
         }
 
         for (Recipe recipe : mcMMO.p.getServer().getRecipesFor(item)) {
-            if (recipe instanceof FurnaceRecipe && ((FurnaceRecipe) recipe).getInput().getType().isBlock() && MaterialUtils.isOre(((FurnaceRecipe) recipe).getInput().getType())) {
+            if (recipe instanceof FurnaceRecipe
+                    && ((FurnaceRecipe) recipe).getInput().getType().isBlock()
+                    && MaterialUtils.isOre(((FurnaceRecipe) recipe).getInput().getType())) {
                 return true;
             }
         }
@@ -549,6 +557,7 @@ public final class ItemUtils {
      * @return true if the item is a mining drop, false otherwise
      */
     public static boolean isMiningDrop(ItemStack item) {
+        //TODO: 1.14 This needs to be updated
         switch (item.getType()) {
             case COAL:
             case COAL_ORE:
@@ -579,6 +588,7 @@ public final class ItemUtils {
      * @return true if the item is a herbalism drop, false otherwise
      */
     public static boolean isHerbalismDrop(ItemStack item) {
+        //TODO: 1.14 This needs to be updated
         switch (item.getType()) {
             case WHEAT:
             case WHEAT_SEEDS:
@@ -591,8 +601,8 @@ public final class ItemUtils {
             case NETHER_WART:
             case BROWN_MUSHROOM:
             case RED_MUSHROOM:
-            case ROSE_RED:
-            case DANDELION_YELLOW:
+            case ROSE_BUSH:
+            case DANDELION:
             case CACTUS:
             case SUGAR_CANE:
             case MELON:
@@ -617,6 +627,7 @@ public final class ItemUtils {
      * @return true if the item is a mob drop, false otherwise
      */
     public static boolean isMobDrop(ItemStack item) {
+        //TODO: 1.14 This needs to be updated
         switch (item.getType()) {
             case STRING:
             case FEATHER:
@@ -658,7 +669,7 @@ public final class ItemUtils {
             case ROTTEN_FLESH:
             case GOLD_NUGGET:
             case EGG:
-            case ROSE_RED:
+            case ROSE_BUSH:
             case COAL:
                 return true;
 
@@ -733,14 +744,5 @@ public final class ItemUtils {
 
         ItemMeta itemMeta = item.getItemMeta();
         return itemMeta.hasDisplayName() && itemMeta.getDisplayName().equals(ChatColor.GOLD + LocaleLoader.getString("Item.ChimaeraWing.Name"));
-    }
-
-    public static boolean isFluxPickaxe(ItemStack item) {
-        if (!isMcMMOItem(item)) {
-            return false;
-        }
-
-        ItemMeta itemMeta = item.getItemMeta();
-        return itemMeta.hasDisplayName() && itemMeta.getDisplayName().equals(ChatColor.GOLD + LocaleLoader.getString("Item.FluxPickaxe.Name"));
     }
 }
